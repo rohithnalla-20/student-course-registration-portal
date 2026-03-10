@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DSA Demo — KL University Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #07090f; --surface: #111827; --border: rgba(255,255,255,0.08);
+      --gold: #f5a623; --green: #10b981; --blue: #3b82f6; --purple: #a78bfa;
+      --red: #ef4444; --cyan: #06b6d4; --text: #e2e8f0; --muted: #64748b;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .header {
+      background: rgba(7,9,15,0.95); border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem;
+    }
+    .logo { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--gold); }
+    .sub  { color: var(--muted); font-size: 0.78rem; margin-left: auto; }
+
+    .container { display: grid; grid-template-columns: 260px 1fr; height: calc(100vh - 60px); }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--surface); border-right: 1px solid var(--border);
+      padding: 1.25rem; overflow-y: auto;
+    }
+    .s-title { font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700; margin-bottom: 1rem; }
+    .s-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin: 1rem 0 0.4rem; font-family: 'JetBrains Mono', monospace; }
+    .dsa-btn {
+      display: block; width: 100%; text-align: left; padding: 8px 10px;
+      border-radius: 6px; margin-bottom: 3px;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      color: #94a3b8; font-size: 0.73rem; cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: all 0.18s;
+    }
+    .dsa-btn:hover { background: rgba(255,255,255,0.07); color: var(--text); border-color: rgba(255,255,255,0.15); }
+    .run-all {
+      width: 100%; padding: 11px; border-radius: 7px; margin-top: 1rem;
+      background: linear-gradient(135deg, var(--gold), #e08a00);
+      border: none; color: #000; font-weight: 700; font-size: 0.82rem;
+      cursor: pointer; font-family: 'Syne', sans-serif; transition: all 0.2s;
+    }
+    .run-all:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(245,166,35,0.3); }
+    .clear-btn {
+      width: 100%; padding: 9px; border-radius: 7px; margin-top: 6px;
+      background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
+      color: var(--red); font-size: 0.75rem; cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+    .clear-btn:hover { background: rgba(239,68,68,0.15); }
+
+    .info-box {
+      margin-top: 1rem; padding: 10px; background: rgba(245,166,35,0.06);
+      border: 1px solid rgba(245,166,35,0.15); border-radius: 7px;
+      font-size: 0.68rem; color: #94a3b8; line-height: 1.7;
+    }
+    .info-box strong { color: var(--gold); }
+
+    /* Console */
+    .console-wrap { display: flex; flex-direction: column; overflow: hidden; }
+    .console-header {
+      padding: 10px 16px; background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .con-title { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--green); }
+    .con-hint  { font-size: 0.65rem; color: var(--muted); }
+    #output {
+      flex: 1; overflow-y: auto; padding: 1rem 1.5rem;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.73rem; line-height: 1.75;
+      color: #b0bec5;
+    }
+    #output::-webkit-scrollbar { width: 4px; }
+    #output::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }
+
+    .c-hdr  { color: var(--gold);   display: block; margin-top: 1rem; }
+    .c-info { color: var(--blue);   display: block; }
+    .c-ok   { color: var(--green);  display: block; }
+    .c-step { color: var(--purple); display: block; padding-left: 16px; }
+    .c-data { color: #e0e0e0;       display: block; padding-left: 16px; }
+    .c-res  { color: var(--cyan);   display: block; }
+    .c-err  { color: var(--red);    display: block; }
+    .c-div  { color: var(--muted);  display: block; }
+    .welcome { color: var(--muted); font-size: 0.7rem; line-height: 2; }
+    .w-tag  { color: var(--green); }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <span class="logo">KL University — DSA Module</span>
+  <span class="sub">Course Registration Portal · dsa-module/dsa-demo.html</span>
+</div>
+
+<div class="container">
+  <div class="sidebar">
+    <div class="s-title">DSA Demonstrations</div>
+
+    <div class="s-label">Data Structures</div>
+    <button class="dsa-btn" onclick="runDemo('array')">① Array / List</button>
+    <button class="dsa-btn" onclick="runDemo('linkedlist')">② Linked List</button>
+    <button class="dsa-btn" onclick="runDemo('stack')">③ Stack (LIFO)</button>
+    <button class="dsa-btn" onclick="runDemo('queue')">④ Queue (FIFO)</button>
+
+    <div class="s-label">Searching</div>
+    <button class="dsa-btn" onclick="runDemo('linear')">⑤ Linear Search O(n)</button>
+    <button class="dsa-btn" onclick="runDemo('binary')">⑥ Binary Search O(log n)</button>
+
+    <div class="s-label">Sorting</div>
+    <button class="dsa-btn" onclick="runDemo('bubble')">⑦ Bubble Sort O(n²)</button>
+    <button class="dsa-btn" onclick="runDemo('selection')">⑧ Selection Sort O(n²)</button>
+    <button class="dsa-btn" onclick="runDemo('insertion')">⑨ Insertion Sort O(n²)</button>
+    <button class="dsa-btn" onclick="runDemo('merge')">⑩ Merge Sort O(n log n)</button>
+    <button class="dsa-btn" onclick="runDemo('quick')">⑪ Quick Sort O(n log n)</button>
+    <button class="dsa-btn" onclick="runDemo('hashmap')">⑫ Hash Map O(1)</button>
+
+    <button class="run-all" onclick="runDemo('all')">▶ Run All Demos</button>
+    <button class="clear-btn" onclick="clearOut()">🗑 Clear Output</button>
+
+    <div class="info-box">
+      <strong>CO Mapping:</strong><br>
+      CO1 → Sorting + Searching<br>
+      CO2 → Arrays + Linked Lists<br>
+      CO3 → Stack + Queue<br>
+      CO4 → Hash Map<br>
+      CO5 → Practical apps<br>
+      CO6 → Full integration
+    </div>
+  </div>
+
+  <div class="console-wrap">
+    <div class="console-header">
+      <span class="con-title">▶ DSA Output Console</span>
+      <span class="con-hint">All output also appears in browser DevTools (F12 → Console)</span>
+    </div>
+    <div id="output">
+      <span class="welcome">
+        <span class="w-tag">[SYSTEM]</span> KL University DSA Module loaded.<br>
+        <span class="w-tag">[INFO]</span> Select any algorithm from the left panel to run a step-by-step demonstration.<br>
+        <span class="w-tag">[INFO]</span> Output appears here AND in browser DevTools console (F12).<br>
+        <span class="w-tag">[READY]</span> Click "Run All Demos" to execute the complete DSA showcase.
+      </span>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Mini output writer ── */
+const out = document.getElementById("output");
+function w(cls, msg) {
+  out.innerHTML += `<span class="${cls}">${msg}</span>`;
+  out.scrollTop = out.scrollHeight;
+}
+function clearOut() {
+  out.innerHTML = `<span class="c-info">[CLEARED] Ready.</span>\n`;
+  console.clear();
+}
+function section(t) {
+  w("c-hdr", `\n▶ ${t}`);
+  w("c-div", "─".repeat(70));
+  console.log(`\n${"═".repeat(70)}\n  ${t}\n${"═".repeat(70)}`);
+}
+function info(m)  { w("c-info", `  ℹ  ${m}`); console.log(`  ℹ  ${m}`); }
+function ok(m)    { w("c-ok",   `  ✅ ${m}`); console.log(`  ✅ ${m}`); }
+function step(m)  { w("c-step", `    ${m}`);  console.log(`    ${m}`); }
+function data(m)  { w("c-data", `      ${m}`);console.log(`      ${m}`); }
+function res(m)   { w("c-res",  `  → ${m}`);  console.log(`  → ${m}`); }
+function divider(){ w("c-div",  "─".repeat(70)); }
+
+/* ── Course data ── */
+const COURSES = [
+  { id:"dsa",   code:"CSE2102", title:"Data Structures & Algorithms",  credits:4, btl:5, category:"dsa" },
+  { id:"web",   code:"CSE2201", title:"Full Stack Web Development",     credits:4, btl:3, category:"web" },
+  { id:"js",    code:"CSE2202", title:"JavaScript Programming",         credits:4, btl:6, category:"js"  },
+  { id:"react", code:"CSE2203", title:"React.js & Modern Frontend",     credits:3, btl:6, category:"js"  },
+  { id:"os",    code:"CSE2103", title:"Operating Systems",              credits:3, btl:4, category:"dsa" },
+  { id:"dbms",  code:"CSE2104", title:"Database Management Systems",    credits:4, btl:5, category:"web" },
+];
+
+/* ── DS Classes ── */
+class Node { constructor(d){ this.data=d; this.next=null; } }
+class LList {
+  constructor(){ this.head=null; this.len=0; }
+  push(d){ const n=new Node(d); if(!this.head){this.head=n;}else{let c=this.head;while(c.next)c=c.next;c.next=n;} this.len++; }
+  pop(d){ if(!this.head)return; if(this.head.data===d){this.head=this.head.next;this.len--;return;} let c=this.head; while(c.next){if(c.next.data===d){c.next=c.next.next;this.len--;return;}c=c.next;} }
+  list(){ const a=[];let c=this.head;while(c){a.push(c.data);c=c.next;}return a; }
+  rev(){ let p=null,c=this.head;while(c){const n=c.next;c.next=p;p=c;c=n;}this.head=p; }
+}
+class Stack{ constructor(){this.items=[];} push(x){this.items.push(x);} pop(){return this.items.pop()||null;} peek(){return this.items[this.items.length-1]||null;} size(){return this.items.length;} isEmpty(){return!this.items.length;} }
+class Queue{ constructor(){this.items=[];} enq(x){this.items.push(x);} deq(){return this.items.shift()||null;} front(){return this.items[0]||null;} size(){return this.items.length;} isEmpty(){return!this.items.length;} }
+
+/* ══ DEMOS ══ */
+function demoArray() {
+  section("① ARRAY — Course Catalogue Storage  [CO2: ADTs using arrays]");
+  info(`COURSES array length: ${COURSES.length}  |  Indices: 0 to ${COURSES.length-1}`);
+  divider();
+  COURSES.forEach((c,i)=>{ data(`[${i}] ${c.code}  |  "${c.title}"  |  ${c.credits} Cr  |  BTL-${c.btl}  |  ${c.category}`); });
+  divider();
+  ok(`Array traversal complete.  Time: O(n)  Space: O(1)`);
+}
+
+function demoLinkedList() {
+  section("② LINKED LIST — Enrollment Chain  [CO2: Linked Lists with insert/delete/traverse/reverse]");
+  const ll = new LList();
+  info("INSERT operations:");
+  COURSES.forEach(c=>{ ll.push(c.code); step(`push("${c.code}") → HEAD → ${ll.list().join(" → ")} → NULL`); });
+  divider();
+  info("SEARCH for CSE2201:");
+  let idx=0,cur=ll.head;
+  while(cur){
+    step(`[${idx}] "${cur.data}" == "CSE2201"? ${cur.data==="CSE2201"?"✅ FOUND!":"❌"}`);
+    if(cur.data==="CSE2201"){ res(`Found at index ${idx}`); break; }
+    cur=cur.next;idx++;
+  }
+  divider();
+  info("DELETE CSE2201:");
+  ll.pop("CSE2201");
+  res(`After delete: HEAD → ${ll.list().join(" → ")} → NULL`);
+  divider();
+  info("REVERSE:");
+  ll.rev();
+  res(`After reverse: HEAD → ${ll.list().join(" → ")} → NULL`);
+  ok(`Time: O(n) all ops  |  Space: O(n)`);
+}
+
+function demoStack() {
+  section("③ STACK (LIFO) — Enrollment Action History  [CO3: Stacks]");
+  const s = new Stack();
+  info("PUSH operations:");
+  COURSES.forEach((c,i)=>{ s.push(c); step(`push("${c.code}") | size=${s.size()} | top="${s.peek().code}"`); });
+  divider();
+  info("PEEK (top without removing):");
+  res(`peek() → "${s.peek().code}" — ${s.peek().title}`);
+  divider();
+  info("POP operations (LIFO — Last In, First Out):");
+  while(!s.isEmpty()){ const p=s.pop(); step(`pop() → "${p.code}" (${p.title}) | remaining=${s.size()}`); }
+  divider();
+  ok(`Stack empty: ${s.isEmpty()}  |  Time: Push/Pop/Peek all O(1)`);
+}
+
+function demoQueue() {
+  section("④ QUEUE (FIFO) — Registration Processing Order  [CO3: Queues]");
+  const q = new Queue();
+  info("ENQUEUE operations (add to rear):");
+  COURSES.forEach((c,i)=>{ q.enq(c); step(`enqueue("${c.code}") | size=${q.size()} | front="${q.front().code}"`); });
+  divider();
+  info("FRONT (peek without removing):");
+  res(`front() → "${q.front().code}" — ${q.front().title}`);
+  divider();
+  info("DEQUEUE operations (FIFO — First In, First Out):");
+  while(!q.isEmpty()){ const d=q.deq(); step(`dequeue() → "${d.code}" (${d.title}) | remaining=${q.size()}`); }
+  divider();
+  ok(`Queue empty: ${q.isEmpty()}  |  Time: Enqueue/Dequeue/Front all O(1)`);
+  ok(`Application: Students registered in order — first enrolled = first processed`);
+}
+
+function demoLinear() {
+  section("⑤ LINEAR SEARCH — by Course Code  [CO1: Searching] O(n)");
+  const targets = ["CSE2202", "CSE9999"];
+  targets.forEach(t=>{
+    divider();
+    info(`Searching for: "${t}"`);
+    let found=false;
+    for(let i=0;i<COURSES.length;i++){
+      const match=COURSES[i].code===t;
+      step(`[${i}] "${COURSES[i].code}" == "${t}"? ${match?"✅ MATCH":"❌"}`);
+      if(match){ res(`FOUND at index ${i}: "${COURSES[i].title}"`); found=true; break; }
+    }
+    if(!found) w("c-err",`  ✗ "${t}" NOT FOUND after ${COURSES.length} comparisons`);
+  });
+  divider();
+  ok(`Time Complexity: O(n) worst  |  O(1) best`);
+}
+
+function demoBinary() {
+  section("⑥ BINARY SEARCH — by Credits (sorted array)  [CO1: Searching] O(log n)");
+  const sorted=[...COURSES].sort((a,b)=>a.credits-b.credits);
+  const target=4;
+  info(`Sorted: [${sorted.map(c=>`${c.code}(${c.credits})`).join(", ")}]`);
+  info(`Searching for credits = ${target}`);
+  divider();
+  let lo=0,hi=sorted.length-1,pass=0;
+  while(lo<=hi){
+    pass++;
+    const mid=Math.floor((lo+hi)/2);
+    step(`Pass ${pass}: lo=${lo} hi=${hi} mid=${mid} → ${sorted[mid].code}(${sorted[mid].credits}cr)`);
+    if(sorted[mid].credits===target){ res(`FOUND "${sorted[mid].title}" at index ${mid} in ${pass} comparisons`); lo=hi+1; }
+    else if(sorted[mid].credits<target){ step(`  ${sorted[mid].credits} < ${target} → go RIGHT`); lo=mid+1; }
+    else { step(`  ${sorted[mid].credits} > ${target} → go LEFT`); hi=mid-1; }
+  }
+  divider();
+  ok(`Binary: O(log ${COURSES.length}) = max ${Math.ceil(Math.log2(COURSES.length))} comparisons  vs  Linear: O(n)=${COURSES.length}`);
+}
+
+function demoBubble() {
+  section("⑦ BUBBLE SORT — by Credits ascending  [CO1: Sorting] O(n²)");
+  const arr=[...COURSES].map(c=>({...c}));
+  info(`Before: [${arr.map(c=>`${c.code}(${c.credits})`).join(", ")}]`);
+  divider();
+  let swaps=0,comps=0;
+  for(let i=0;i<arr.length-1;i++){
+    let sw=false;
+    for(let j=0;j<arr.length-1-i;j++){ comps++; if(arr[j].credits>arr[j+1].credits){[arr[j],arr[j+1]]=[arr[j+1],arr[j]];swaps++;sw=true;} }
+    step(`Pass ${i+1}: [${arr.map(c=>`${c.code}(${c.credits})`).join(" ")}]`);
+    if(!sw){info(`Early exit at pass ${i+1}`);break;}
+  }
+  divider();
+  ok(`Comparisons: ${comps}  Swaps: ${swaps}`);
+  res(arr.map(c=>`${c.title}(${c.credits}cr)`).join(" → "));
+}
+
+function demoSelection() {
+  section("⑧ SELECTION SORT — by Course Code alphabetical  [CO1: Sorting] O(n²)");
+  const arr=[...COURSES].map(c=>({...c}));
+  info(`Before: [${arr.map(c=>c.code).join(", ")}]`);
+  divider();
+  let swaps=0,comps=0;
+  for(let i=0;i<arr.length-1;i++){
+    let min=i;
+    for(let j=i+1;j<arr.length;j++){comps++;if(arr[j].code<arr[min].code)min=j;}
+    if(min!==i){[arr[i],arr[min]]=[arr[min],arr[i]];swaps++;}
+    step(`Step ${i+1}: placed "${arr[i].code}" → [${arr.map(c=>c.code).join(", ")}]`);
+  }
+  divider();
+  ok(`Comparisons: ${comps}  Swaps: ${swaps}`);
+  res(arr.map(c=>c.code).join(" → "));
+}
+
+function demoInsertion() {
+  section("⑨ INSERTION SORT — by Title alphabetical  [CO1: Sorting] O(n²)");
+  const arr=[...COURSES].map(c=>({...c}));
+  info(`Before: [${arr.map(c=>c.title.split(" ")[0]).join(", ")}]`);
+  divider();
+  let shifts=0;
+  for(let i=1;i<arr.length;i++){
+    const key=arr[i];let j=i-1;
+    while(j>=0&&arr[j].title>key.title){arr[j+1]=arr[j];j--;shifts++;}
+    arr[j+1]=key;
+    step(`Insert "${key.title.split(" ")[0]}" → [${arr.map(c=>c.title.split(" ")[0]).join(", ")}]`);
+  }
+  divider();
+  ok(`Shifts: ${shifts}`);
+  res(arr.map(c=>c.title).join(" → "));
+}
+
+function demoMerge() {
+  section("⑩ MERGE SORT — by BTL level  [CO1: Sorting] O(n log n)");
+  const arr=[...COURSES].map(c=>({...c}));
+  info(`Before: [${arr.map(c=>`${c.code}(BTL${c.btl})`).join(", ")}]`);
+  divider();
+  function merge(l,r,d){
+    const res=[];let i=0,j=0;
+    while(i<l.length&&j<r.length){if(l[i].btl<=r[j].btl)res.push(l[i++]);else res.push(r[j++]);}
+    const m=res.concat(l.slice(i)).concat(r.slice(j));
+    if(d<=2)step(`[d=${d}] merged: [${m.map(c=>`${c.code}(${c.btl})`).join(",")}]`);
+    return m;
+  }
+  function ms(a,d=0){if(a.length<=1)return a;const mid=Math.floor(a.length/2);return merge(ms(a.slice(0,mid),d+1),ms(a.slice(mid),d+1),d);}
+  const sorted=ms(arr);
+  divider();
+  ok(`Stable sort. Time: O(n log n) always  Space: O(n)`);
+  res(sorted.map(c=>`${c.code}(BTL${c.btl})`).join(" → "));
+}
+
+function demoQuick() {
+  section("⑪ QUICK SORT — by Credits  [CO1: Sorting] O(n log n) avg");
+  const arr=[...COURSES].map(c=>({...c}));
+  info(`Before: [${arr.map(c=>`${c.code}(${c.credits})`).join(", ")}]`);
+  divider();
+  function part(a,lo,hi){
+    const pv=a[hi].credits;let i=lo-1;
+    for(let j=lo;j<hi;j++){if(a[j].credits<=pv){i++;[a[i],a[j]]=[a[j],a[i]];}}
+    [a[i+1],a[hi]]=[a[hi],a[i+1]];return i+1;
+  }
+  function qs(a,lo,hi,d=0){
+    if(lo<hi){
+      step(`[d=${d}] pivot:${a[hi].code}(${a[hi].credits}) range[${lo}..${hi}]`);
+      const pi=part(a,lo,hi);
+      step(`  partitioned:[${a.map(c=>`${c.code}(${c.credits})`).join(",")}] pivot@${pi}`);
+      qs(a,lo,pi-1,d+1);qs(a,pi+1,hi,d+1);
+    }
+  }
+  qs(arr,0,arr.length-1);
+  divider();
+  ok(`In-place sort. Time: O(n log n) avg  O(n²) worst  Space: O(log n)`);
+  res(arr.map(c=>`${c.code}(${c.credits}cr)`).join(" → "));
+}
+
+function demoHashMap() {
+  section("⑫ HASH MAP — O(1) course lookup  [CO4: Hash-based structures]");
+  const map=new Map();
+  info("Building HashMap...");
+  COURSES.forEach(c=>{map.set(c.code,c);step(`put("${c.code}") → "${c.title}"  |  map.size=${map.size}`);});
+  divider();
+  info("LOOKUP operations:");
+  ["CSE2102","CSE2203","CSE9999"].forEach(k=>{
+    const v=map.get(k);
+    step(`get("${k}") → ${v?`"${v.title}" ✅`:"undefined ❌"}`);
+  });
+  divider();
+  ok(`Time: O(1) avg for put/get/delete  |  Space: O(n)  |  No duplicate keys`);
+  ok(`Application: Fast course lookup, conflict detection`);
+}
+
+/* ── Run dispatcher ── */
+const DEMO_MAP = {
+  array: demoArray, linkedlist: demoLinkedList, stack: demoStack, queue: demoQueue,
+  linear: demoLinear, binary: demoBinary,
+  bubble: demoBubble, selection: demoSelection, insertion: demoInsertion,
+  merge: demoMerge, quick: demoQuick, hashmap: demoHashMap
+};
+
+function runDemo(name) {
+  if (name === "all") {
+    out.innerHTML = "";
+    w("c-info", "[SYSTEM] Running all DSA demos...\n");
+    Object.values(DEMO_MAP).forEach(fn => fn());
+    divider();
+    w("c-ok", "  ✅ ALL DEMOS COMPLETE — Check browser DevTools for full output (F12)");
+  } else if (DEMO_MAP[name]) {
+    out.innerHTML = "";
+    DEMO_MAP[name]();
+  }
+}
+</script>
+</body>
+</html>

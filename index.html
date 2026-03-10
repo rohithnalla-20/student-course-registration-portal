@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KL University — Course Registration Portal</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     HEADER
+══════════════════════════════════════════ -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-mark">KL</div>
+      <div class="logo-text">
+        <span class="logo-title">KL University</span>
+        <span class="logo-sub">Course Registration System · AY 2025–26</span>
+      </div>
+    </div>
+    <nav class="header-nav">
+      <button class="nav-btn active" data-page="register" onclick="showPage('register')">📋 Register</button>
+      <button class="nav-btn" data-page="enrolled" onclick="showPage('enrolled')">✅ My Courses</button>
+      <button class="nav-btn" data-page="dsa" onclick="showPage('dsa')">🔷 DSA Console</button>
+    </nav>
+    <div class="header-student">
+      <div class="student-avatar">AS</div>
+      <div class="student-info">
+        <span class="s-name">Arjun Sharma</span>
+        <span class="s-id">2300031042</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════
+     PAGE: REGISTER
+══════════════════════════════════════════ -->
+<div id="page-register" class="page active">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Course Catalogue</h1>
+      <p class="page-desc">Select courses for Semester IV. Click any CO pill to view full outcome details.</p>
+    </div>
+    <div class="cart-summary">
+      <div class="cart-stat">
+        <span class="cs-val" id="hdr-courses">0</span>
+        <span class="cs-lbl">Courses</span>
+      </div>
+      <div class="cart-divider"></div>
+      <div class="cart-stat">
+        <span class="cs-val" id="hdr-credits">0</span>
+        <span class="cs-lbl">Credits</span>
+      </div>
+      <button class="submit-hdr-btn" id="submitHdrBtn" onclick="submitRegistration()" disabled>Submit →</button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <div class="tab-group">
+      <button class="tab active" id="tab-all" onclick="filterTab('all')">All</button>
+      <button class="tab" id="tab-dsa" onclick="filterTab('dsa')">DSA</button>
+      <button class="tab" id="tab-web" onclick="filterTab('web')">Web Dev</button>
+      <button class="tab" id="tab-js" onclick="filterTab('js')">JavaScript</button>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input id="searchInput" class="search-input" type="text" placeholder="Search courses, COs, POs…" oninput="onSearch()"/>
+      <button class="sort-btn" onclick="cycleSortMode()" id="sortBtn" title="Sort courses">⇅ Name</button>
+    </div>
+  </div>
+
+  <!-- Course Grid -->
+  <div class="course-grid" id="courseGrid"></div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: ENROLLED
+══════════════════════════════════════════ -->
+<div id="page-enrolled" class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">My Enrolled Courses</h1>
+      <p class="page-desc">Your current registration cart. Remove or submit below.</p>
+    </div>
+  </div>
+
+  <div class="enrolled-layout">
+    <div class="enrolled-table-wrap">
+      <table class="enrolled-table" id="enrolledTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Course Code</th>
+            <th>Course Title</th>
+            <th>Category</th>
+            <th>Credits</th>
+            <th>COs</th>
+            <th>Max BTL</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="enrolledTbody"></tbody>
+      </table>
+      <div class="enrolled-empty" id="enrolledEmpty">
+        <div class="empty-icon">📋</div>
+        <p>No courses enrolled yet.<br>Go to the catalogue to add courses.</p>
+      </div>
+    </div>
+
+    <div class="enrolled-sidebar">
+      <div class="es-card">
+        <div class="es-title">Registration Summary</div>
+        <div class="es-row"><span>Total Courses</span><strong id="sum-courses">0</strong></div>
+        <div class="es-row"><span>Total Credits</span><strong id="sum-credits">0</strong></div>
+        <div class="es-row"><span>DSA Courses</span><strong id="sum-dsa">0</strong></div>
+        <div class="es-row"><span>Web Courses</span><strong id="sum-web">0</strong></div>
+        <div class="es-row"><span>JS Courses</span><strong id="sum-js">0</strong></div>
+        <div class="credit-bar-wrap">
+          <div class="credit-bar-labels">
+            <span>Credit Load</span><span id="sum-pct">0%</span>
+          </div>
+          <div class="credit-bar"><div class="credit-fill" id="creditFill"></div></div>
+        </div>
+        <button class="submit-full-btn" id="submitFullBtn" onclick="submitRegistration()" disabled>
+          🎓 Submit Registration
+        </button>
+      </div>
+
+      <div class="es-card" style="margin-top:1rem;">
+        <div class="es-title">DSA Queue Preview</div>
+        <p style="font-size:0.72rem;color:var(--muted);margin-bottom:0.75rem;">Enrollment order (Queue — FIFO)</p>
+        <div id="queueViz" class="queue-viz"></div>
+        <button class="dsa-demo-btn" onclick="showPage('dsa')">View Full DSA Console →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: DSA CONSOLE
+══════════════════════════════════════════ -->
+<div id="page-dsa" class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">DSA Console</h1>
+      <p class="page-desc">Live demonstration of DSA concepts applied to the course registration system.</p>
+    </div>
+  </div>
+
+  <div class="dsa-layout">
+    <!-- Controls -->
+    <div class="dsa-controls">
+      <div class="dsa-section-title">Run DSA Demos</div>
+
+      <div class="dsa-btn-group">
+        <div class="dsa-btn-label">📦 Arrays & Lists</div>
+        <button class="dsa-btn" onclick="demoArray()">Display All Courses Array</button>
+        <button class="dsa-btn" onclick="demoLinkedList()">Traverse Enrolled (Linked List)</button>
+      </div>
+
+      <div class="dsa-btn-group">
+        <div class="dsa-btn-label">📚 Stack</div>
+        <button class="dsa-btn" onclick="demoStackPush()">Push Course to Stack</button>
+        <button class="dsa-btn" onclick="demoStackPop()">Pop Course from Stack</button>
+        <button class="dsa-btn" onclick="demoStackAll()">Show Full Stack State</button>
+      </div>
+
+      <div class="dsa-btn-group">
+        <div class="dsa-btn-label">🔁 Queue</div>
+        <button class="dsa-btn" onclick="demoQueueEnqueue()">Enqueue (Add to Queue)</button>
+        <button class="dsa-btn" onclick="demoQueueDequeue()">Dequeue (Process Queue)</button>
+        <button class="dsa-btn" onclick="demoQueueAll()">Show Full Queue State</button>
+      </div>
+
+      <div class="dsa-btn-group">
+        <div class="dsa-btn-label">🔍 Searching</div>
+        <button class="dsa-btn" onclick="demoLinearSearch()">Linear Search by Code</button>
+        <button class="dsa-btn" onclick="demoBinarySearch()">Binary Search by Credits</button>
+      </div>
+
+      <div class="dsa-btn-group">
+        <div class="dsa-btn-label">🔀 Sorting</div>
+        <button class="dsa-btn" onclick="demoBubbleSort()">Bubble Sort (by Credits)</button>
+        <button class="dsa-btn" onclick="demoSelectionSort()">Selection Sort (by Code)</button>
+        <button class="dsa-btn" onclick="demoInsertionSort()">Insertion Sort (by Title)</button>
+        <button class="dsa-btn" onclick="demoMergeSort()">Merge Sort (by BTL)</button>
+        <button class="dsa-btn" onclick="demoQuickSort()">Quick Sort (by Credits)</button>
+      </div>
+
+      <button class="dsa-clear-btn" onclick="clearConsole()">🗑 Clear Console</button>
+    </div>
+
+    <!-- Console Output -->
+    <div class="dsa-console-wrap">
+      <div class="console-header">
+        <span class="console-title">▶ Output Console</span>
+        <span class="console-hint">Open browser DevTools → Console tab to see full logs</span>
+      </div>
+      <div class="console-body" id="consoleBody">
+        <div class="console-welcome">
+          <span class="cw-tag">[SYSTEM]</span> DSA Console initialized. Select any operation from the panel to run a demonstration.<br>
+          <span class="cw-tag">[INFO]</span> All operations also log to browser DevTools console (F12).<br>
+          <span class="cw-tag">[READY]</span> Enroll some courses first, then explore Stack / Queue / Search / Sort demos.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MODAL — Registration Confirmation
+══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-icon">🎓</div>
+    <div class="modal-title">Registration Confirmed!</div>
+    <div class="modal-sub">Your registration for Semester IV has been submitted. A confirmation will be sent to your university email.</div>
+    <div id="modalCourseList" class="modal-course-list"></div>
+    <button class="modal-close" onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span id="toastIcon">✅</span>
+  <span id="toastMsg">Done.</span>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
